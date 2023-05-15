@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  ic-deploy-nautilus
+  namespace: default
+  labels:
+    app:  ic-deploy-nautilus
+spec:
+  selector:
+    matchLabels:
+      app: ic-nautilus
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  ic-nautilus
+    spec:
+      initContainers:
+      - name: ic-msg-nautilus
+        image:  ubuntu:latest
+        command: ["/bin/bash","-c","echo Init Done - Welcome to xFusionCorp Industries > /ic/news"]
+        volumeMounts:
+          - name: ic-volume-nautilus
+            mountPath: /ic
+      containers:
+      - name:  ic-main-nautilus
+        image:  ubuntu:latest
+        command: ["/bin/bash","-c","while true; do cat /ic/news; sleep 5; done"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: ic-volume-nautilus
+          mountPath: /ic
+      volumes:
+        - name: ic-volume-nautilus
+          emptyDir: {}
+      restartPolicy: Always

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  nagios-deployment
+  namespace: default
+  labels:
+    app:  nagios-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nagios
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  nagios
+    spec:
+      containers:
+      - name:  nagios-container
+        image:  jasonrivers/nagios
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort:  80
+          name:  nagios-port
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nagios-service
+  namespace: default
+spec:
+  selector:
+    app: nagios
+  type: NodePort
+  ports:
+  - name: nagios-service
+    protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30008

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-nautilus
+  namespace: default
+spec:
+  selector:
+    app: pod-nautilus
+  type: NodePort
+  ports:
+  - name: web-nautilus
+    protocol: TCP
+    port: 80
+    nodePort: 30008

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  grafana-deployment-devops
+  namespace: default
+  labels:
+    app:  grafana-deployment-devops
+spec:
+  selector:
+    matchLabels:
+      app: grafana-devops
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  grafana-devops
+    spec:
+      containers:
+      - name:  grafana-container-devops
+        image:  grafana:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort:  3000
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: default
+spec:
+  selector:
+    app: grafana-devops
+  type: NodePort
+  ports:
+  - name: grafana-service
+    protocol: TCP
+    port: 80
+    targetPort: 3000
+    nodePort: 32000

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  node-deploy
+  namespace: default
+  labels:
+    app:  node
+spec:
+  selector:
+    matchLabels:
+      app: node
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  node
+    spec:
+      containers:
+      - name:  node
+        image:  gcr.io/kodekloud/centos-ssh-enabled:node
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort:  8080
+          name:  node
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-service
+  namespace: default
+spec:
+  selector:
+    app: node
+  type: NodePort
+  ports:
+  - name: node-service
+    protocol: TCP
+    port: 80
+    targetPort: 8080
+    nodePort: 30012

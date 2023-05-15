@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-nautilus
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/security
+    
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nautilus
+  namespace: default
+  labels:
+    app: pvc-nautilus
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-nautilus
+  namespace: default
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: container-nautilus
+      image: nginx:latest
+      resources:
+        limits:
+          cpu: 200m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 200Mi
+      ports:
+        - containerPort: 80
+          name: http
+      volumeMounts:
+        - name: pv-nautilus
+          mountPath: /usr/share/nginx/html
+  volumes:
+    - name: pv-nautilus
+      persistentVolumeClaim:
+        claimName: pvc-nautilus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-nautilus
+  namespace: default
+spec:
+  selector:
+    app: nginx
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30008
